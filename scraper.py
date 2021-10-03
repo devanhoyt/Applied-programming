@@ -1,8 +1,6 @@
 import requests
 import csv
 from bs4 import BeautifulSoup
-from datetime import datetime
-
 from requests.models import Response
 
 #function to get the desired position for the search
@@ -22,16 +20,16 @@ def get_url(position, location):
     return url
 
 #Function to pull the different pieces of job data from the different listings
-def record_collector(card):
+def record_collector(slider):
 
-    job_title = card.find('h2', 'jobTitle', 'title').text
-    company_name = card.find('span', 'companyName').text.strip()
-    company_location=card.find('div', 'companyLocation').text
-    job_descrip=card.find('div', 'job-snippet').text
-    job_date = card.find('span', 'date').text.strip()
+    job_title = slider.find('h2', 'jobTitle', 'title').text.strip()
+    company_name = slider.find('span', 'companyName').text.strip()
+    company_location=slider.find('div', 'companyLocation').text.strip()
+    job_descrip=slider.find('div', 'job-snippet').text.strip()
+    job_date = slider.find('span', 'date').text.strip()
 
 # because not every job has a salary posted, there needs to be a conditional
-    job_pay = card.find('class', 'salary-snippet')
+    job_pay = slider.find('class', 'salary-snippet')
     if job_pay:
         salary = job_pay.text
     else:
@@ -39,7 +37,7 @@ def record_collector(card):
     record = ( job_title, company_name, company_location, salary, job_date, job_descrip)
     return record
     
-
+#main function to run everything
 def main(position, location):
     records = []
     position = get_position(position)
@@ -47,33 +45,37 @@ def main(position, location):
     url = get_url(position, location)
 
 
-    
+    #while statement that allows the files to 
     while True:
 
         page = requests.get(url)
     
-        soup = BeautifulSoup(page.text, 'html.parser')
+        whole_page = BeautifulSoup(page.text, 'html.parser')
 
-        cards = soup.find_all('div', 'slider_item')
-        for card in cards:
-            record = record_collector(card)
+        sliders = whole_page.find_all('div', 'slider_item')
+        #goes through each slider and extracts the necessary information
+        for slider in sliders:
+            record = record_collector(slider)
             records.append(record)
             print(record)
         #num = 10
         #To continue to the next page
         try:
             #url = f"https://www.indeed.com/jobs?q={position}&l={location}&start={num}"
-            url = 'https://www.indeed.com' + soup.find('a', {'aria-label': 'Next'}).get('href')
+            url = 'https://www.indeed.com' + whole_page.find('a', {'aria-label': 'Next'}).get('href')
         except AttributeError:
             break
         
-        #break
+       
 
-    #print(records)
+    
     #writes everything to a csv file
     with open(f'{position + location}.csv', 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['JobTitle', 'Company', 'Location', 'Pay', 'Posted', 'Description.'])
         writer.writerows(records)
-#print(records)
+
+
+
+
 main('', '')
