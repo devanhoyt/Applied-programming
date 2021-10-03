@@ -57,7 +57,7 @@ def main(position, location):
         for slider in sliders:
             record = record_collector(slider)
             records.append(record)
-            print(record)
+            #print(record)
         #num = 10
         #To continue to the next page
         try:
