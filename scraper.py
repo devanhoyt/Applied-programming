@@ -45,7 +45,7 @@ def main(position, location):
     url = get_url(position, location)
 
 
-    #while statement that allows the files to 
+    #while statement that allows the files to record while there are some
     while True:
 
         page = requests.get(url)
@@ -66,16 +66,16 @@ def main(position, location):
         except AttributeError:
             break
         
-       
-
-    
+    # A check to see if there is a captcha in effect or if there wasn't any information that was inputed   
+    if records == 0:
+        print("The program was unable to detect any information. Check to ensure there isn't a captcha in effect")
+        exit
+    else:
     #writes everything to a csv file
-    with open(f'{position + location}.csv', 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(['JobTitle', 'Company', 'Location', 'Pay', 'Posted', 'Description.'])
-        writer.writerows(records)
-
-
+        with open(f'{position + location}.csv', 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['JobTitle', 'Company', 'Location', 'Pay', 'Posted', 'Description.'])
+            writer.writerows(records)
 
 
 main('', '')
